@@ -1,0 +1,17 @@
+# role: jomrr.samba_ad_objects
+# file: .gitignore
+
+__pycache__/
+.ansible/
+.cache/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.uv-cache/
+.idea/
+.tox/
+.venv/
+.vscode/
+cache/
+collections/*
+dist/

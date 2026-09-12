@@ -1,0 +1,152 @@
+---
+# role: samba_ad_objects
+# file: molecule/dev/molecule.yml
+
+dependency:
+  name: "galaxy"
+  options:
+    requirements-file: "${MOLECULE_PROJECT_DIRECTORY}/collections.yml"
+    role-file: "${SAMBA_AD_OBJECTS_ROLE_REQUIREMENTS:-molecule/resources/requirements.yml}"
+driver:
+  name: "podman"
+provisioner:
+  name: "ansible"
+  config_options:
+    defaults:
+      forks: 8
+      interpreter_python: "auto_silent"
+      allow_world_readable_tmpfiles: true
+      callbacks_enabled: "ansible.builtin.default"
+      callback_result_format: "yaml"
+      remote_tmp: "/tmp/.ansible/tmp"
+    ssh_connection:
+      pipelining: true
+  log: true
+  playbooks:
+    converge: "../resources/playbooks/converge.yml"
+    verify: "../resources/playbooks/verify.yml"
+    prepare: "../resources/playbooks/prepare.yml"
+    side_effect: "../resources/playbooks/side_effect.yml"
+  inventory:
+    group_vars:
+      all:
+        samba_ad_objects_ous:
+          - name: "Molecule"
+            path: "DC=ad,DC=example,DC=test"
+          - name: "Staff"
+            path: "OU=Molecule,DC=ad,DC=example,DC=test"
+            description: "Initial staff OU"
+          - name: "Groups"
+            path: "OU=Molecule,DC=ad,DC=example,DC=test"
+          - name: "Retired"
+            path: "OU=Molecule,DC=ad,DC=example,DC=test"
+          - name: "Children"
+            path: "OU=Retired,OU=Molecule,DC=ad,DC=example,DC=test"
+        samba_ad_objects_users:
+          - username: "moleculereader"
+            password: "Molecule-Only-Reader1!"
+          - username: "molecule-managed"
+            password: "Molecule-Managed-Account1!"
+            path: "OU=Staff,OU=Molecule,DC=ad,DC=example,DC=test"
+            display_name: "Initial managed user"
+            uid_number: 21001
+            gid_number: 21000
+          - username: "molecule-retired"
+            password: "Molecule-Retired-Account1!"
+            path: "OU=Children,OU=Retired,OU=Molecule,DC=ad,DC=example,DC=test"
+        samba_ad_objects_groups:
+          - name: "molecule-parent-group"
+            path: "OU=Groups,OU=Molecule,DC=ad,DC=example,DC=test"
+            members:
+              - "molecule-managed-group"
+            members_purge: false
+          - name: "molecule-managed-group"
+            path: "OU=Groups,OU=Molecule,DC=ad,DC=example,DC=test"
+            members:
+              - "molecule-managed"
+            description: "Initial managed group"
+            gid_number: 21000
+          - name: "molecule-scope-group"
+            path: "OU=Groups,OU=Molecule,DC=ad,DC=example,DC=test"
+            scope: "universal"
+            category: "distribution"
+            members:
+              - "molecule-managed-group"
+          - name: "molecule-audit-group"
+            members:
+              - "moleculereader"
+          - name: "molecule-retired-group"
+            path: "OU=Retired,OU=Molecule,DC=ad,DC=example,DC=test"
+            members:
+              - "molecule-retired"
+        samba_ad_objects_server: "dc1.ad.example.test"
+        samba_ad_objects_realm: "AD.EXAMPLE.TEST"
+        samba_ad_objects_admin_password: "Molecule-Only-Adm1n!"
+        samba_ad_dc_hostname: "dc1"
+        samba_ad_dc_realm: "{{ samba_ad_objects_realm }}"
+        samba_ad_dc_domain: "EXAMPLE"
+        samba_ad_dc_admin_password: "{{ samba_ad_objects_admin_password }}"
+  connection_options:
+    ansible_user: "molecule"
+verifier:
+  name: "ansible"
+scenario:
+  test_sequence:
+    - "dependency"
+    - "destroy"
+    - "syntax"
+    - "create"
+    - "prepare"
+    - "converge"
+    - "idempotence"
+    - "check"
+    - "verify"
+    - "side_effect"
+    - "destroy"
+  name: "dev"
+platforms:
+  - name: "samba-ad-objects-almalinux"
+    hostname: "dc1"
+    image: "docker.io/jomrr/molecule-almalinux:latest"
+    pre_build_image: true
+    override_command: false
+    systemd: "true"
+    privileged: true
+    extra_opts:
+      - "--tmpfs=/var/lib/samba:rw,size=1g,mode=0755"
+  - name: "samba-ad-objects-debian"
+    hostname: "dc1"
+    image: "docker.io/jomrr/molecule-debian:latest"
+    pre_build_image: true
+    override_command: false
+    systemd: "true"
+    privileged: true
+    extra_opts:
+      - "--tmpfs=/var/lib/samba:rw,size=1g,mode=0755"
+  - name: "samba-ad-objects-fedora"
+    hostname: "dc1"
+    image: "docker.io/jomrr/molecule-fedora:latest"
+    pre_build_image: true
+    override_command: false
+    systemd: "true"
+    privileged: true
+    extra_opts:
+      - "--tmpfs=/var/lib/samba:rw,size=1g,mode=0755"
+  - name: "samba-ad-objects-suse"
+    hostname: "dc1"
+    image: "docker.io/jomrr/molecule-opensuse-tumbleweed:latest"
+    pre_build_image: true
+    override_command: false
+    systemd: "true"
+    privileged: true
+    extra_opts:
+      - "--tmpfs=/var/lib/samba:rw,size=1g,mode=0755"
+  - name: "samba-ad-objects-ubuntu"
+    hostname: "dc1"
+    image: "docker.io/jomrr/molecule-ubuntu:latest"
+    pre_build_image: true
+    override_command: false
+    systemd: "true"
+    privileged: true
+    extra_opts:
+      - "--tmpfs=/var/lib/samba:rw,size=1g,mode=0755"

@@ -1,0 +1,18 @@
+---
+# role: samba_ad_objects
+# file: meta/main.yml
+
+galaxy_info:
+  author: Jonas Mauer
+  description: Ansible role for managing Samba AD users, groups, organizational units, and DNS reservations.
+  galaxy_tags:
+    - samba
+    - activedirectory
+    - users
+    - groups
+    - ldap
+  issue_tracker_url: https://github.com/jomrr/ansible-role-samba_ad_objects/issues
+  license: MIT
+  min_ansible_version: "2.20"
+  namespace: jomrr
+  role_name: samba_ad_objects

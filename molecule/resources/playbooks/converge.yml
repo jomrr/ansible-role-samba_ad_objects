@@ -1,0 +1,9 @@
+---
+# role: samba_ad_objects
+# file: molecule/resources/playbooks/converge.yml
+
+- name: SAMBA_AD_OBJECTS | Converge directory objects
+  hosts: all
+  gather_facts: false
+  roles:
+    - role: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}"

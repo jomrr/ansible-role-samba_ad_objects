@@ -1,0 +1,43 @@
+---
+# role: samba_ad_objects
+# file: tasks/directory.yml
+
+- name: SAMBA_AD_OBJECTS | Reserve DNS names against client registration
+  jomrr.samba.samba_dns_record:
+    zone: "{{ samba_ad_objects_realm | lower }}"
+    name: "{{ __samba_ad_objects_reserved_name }}"
+    type: A
+    value: 127.0.0.1
+    state: present
+  loop: "{{ samba_ad_objects_dns_reserved_names }}"
+  loop_control:
+    loop_var: __samba_ad_objects_reserved_name
+
+- name: SAMBA_AD_OBJECTS | Create organizational units in parent-before-child order
+  jomrr.samba.samba_ou:
+    name: "{{ __samba_ad_objects_ou.name }}"
+    path: "{{ __samba_ad_objects_ou.path }}"
+    description: "{{ __samba_ad_objects_ou.description | default(omit) }}"
+    state: present
+  loop: "{{ samba_ad_objects_ous }}"
+  loop_control:
+    loop_var: __samba_ad_objects_ou
+    label: "{{ __samba_ad_objects_ou.name }}"
+  when: (__samba_ad_objects_ou.state | default('present')) == 'present'
+
+- name: SAMBA_AD_OBJECTS | Manage domain users
+  ansible.builtin.import_tasks: users.yml
+
+- name: SAMBA_AD_OBJECTS | Manage domain groups and memberships
+  ansible.builtin.import_tasks: groups.yml
+
+- name: SAMBA_AD_OBJECTS | Remove empty organizational units in child-before-parent order
+  jomrr.samba.samba_ou:
+    name: "{{ __samba_ad_objects_ou.name }}"
+    path: "{{ __samba_ad_objects_ou.path }}"
+    state: absent
+  loop: "{{ samba_ad_objects_ous | reverse | list }}"
+  loop_control:
+    loop_var: __samba_ad_objects_ou
+    label: "{{ __samba_ad_objects_ou.name }}"
+  when: (__samba_ad_objects_ou.state | default('present')) == 'absent'

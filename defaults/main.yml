@@ -1,0 +1,93 @@
+---
+# role: samba_ad_objects
+# file: defaults/main.yml
+
+# DNS hostname of the existing domain controller used for directory operations; required.
+# samba_ad_objects_server:
+# Example: samba_ad_objects_server: dc1.ad.example.com
+
+# Kerberos realm of the existing domain; required.
+# samba_ad_objects_realm:
+# Example: samba_ad_objects_realm: AD.EXAMPLE.COM
+
+# Administrator password for directory operations; required and supplied through a secret store.
+# samba_ad_objects_admin_password:
+# Example: samba_ad_objects_admin_password: "{{ vault_samba_ad_admin_password }}"
+
+# DNS names reserved with administrator-owned loopback A records; [] stops management.
+samba_ad_objects_dns_reserved_names: [wpad, isatap]
+
+# Organizational units in parent-before-child order; absent OUs are removed in reverse order.
+# Removing an entry stops management; state: absent deletes only an empty OU.
+samba_ad_objects_ous: []
+# Example:
+# samba_ad_objects_ous:
+#   - name: Staff  # Required OU name (RDN value).
+#     path: DC=ad,DC=example,DC=com  # Required parent DN; parent must already exist.
+#     description: Staff accounts  # Optional LDAP description; omitted leaves it unchanged.
+#     state: present  # present (default) or absent; deletion is not recursive.
+#   - name: Engineering
+#     path: OU=Staff,DC=ad,DC=example,DC=com
+#     description: Engineering team
+#     state: present
+
+# Domain user accounts; removing an entry stops management, state: absent deletes it.
+# New accounts require a password from a secret store.
+# Omitted profile and POSIX attributes remain unchanged; POSIX attributes require RFC2307.
+# Omitted path places or moves the account to CN=Users,<domain DN>.
+# Omitted update_password inherits samba_ad_objects_user_update_password.
+samba_ad_objects_users: []
+# Example:
+# samba_ad_objects_users:
+#   - username: jdoe  # Required user logon name (sAMAccountName).
+#     path: OU=Engineering,OU=Staff,DC=ad,DC=example,DC=com  # Optional existing parent DN.
+#     given_name: Jane  # First name (givenName).
+#     surname: Doe  # Last name (sn).
+#     display_name: Jane Doe  # Display name (displayName).
+#     email: jane.doe@example.com  # Email address (mail).
+#     description: Engineering account  # LDAP description.
+#     uid_number: 10001  # Integer POSIX user ID (uidNumber).
+#     gid_number: 10000  # Integer POSIX primary group ID (gidNumber).
+#     unix_home_directory: /home/jdoe  # POSIX home directory (unixHomeDirectory).
+#     login_shell: /bin/bash  # POSIX login shell (loginShell).
+#     gecos: Jane Doe  # POSIX GECOS field (gecos).
+#     enabled: true  # true (default) enables the account; false disables it.
+#     password: "{{ vault_jdoe_password }}"  # Required for creation; otherwise optional.
+#     update_password: on_create  # on_create or always; overrides samba_ad_objects_user_update_password.
+#     state: present  # present (default) or absent.
+
+# Password update policy for users; each user may override update_password.
+# on_create sets the supplied password only on creation; always resets it on every run.
+# always reports a change on every run; neither policy changes a password when password is omitted.
+samba_ad_objects_user_update_password: on_create
+# Example: samba_ad_objects_user_update_password: always
+
+# Domain groups; members are managed after every listed group exists, allowing nested groups.
+# Removing an entry stops management; state: absent deletes the group.
+# Omitted path places or moves the group to CN=Users,<domain DN>.
+# Omitted description and gid_number leave those attributes unchanged.
+# Omitted members_purge inherits samba_ad_objects_group_members_purge.
+# Omitted members leaves membership unmanaged; members: [] clears it only with members_purge: true.
+samba_ad_objects_groups: []
+# Example:
+# samba_ad_objects_groups:
+#   - name: engineers  # Required group name (sAMAccountName).
+#     path: OU=Engineering,OU=Staff,DC=ad,DC=example,DC=com  # Optional existing parent DN.
+#     scope: global  # global (default), domain_local, or universal.
+#     category: security  # security (default) or distribution; combines with scope into groupType.
+#     description: Engineering staff  # Optional LDAP description.
+#     gid_number: 10000  # Optional integer POSIX group ID (gidNumber); requires RFC2307.
+#     members:  # Optional list of user, group, or computer sAMAccountNames.
+#       - jdoe
+#     members_purge: false  # Overrides samba_ad_objects_group_members_purge; false adds, true replaces the set.
+#     state: present  # present (default) or absent.
+#   - name: announcements
+#     scope: universal
+#     category: distribution
+#     members:
+#       - engineers  # Nested group; all listed groups exist before memberships are managed.
+
+# Membership policy used when a group supplies members; each group may override members_purge.
+# false adds missing members and keeps unlisted ones; true removes unlisted members.
+samba_ad_objects_group_members_purge: false
+# Example: samba_ad_objects_group_members_purge: true

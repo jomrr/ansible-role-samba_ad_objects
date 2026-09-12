@@ -1,0 +1,183 @@
+---
+# role: samba_ad_objects
+# file: meta/argument_specs.yml
+
+argument_specs:
+  main:
+    short_description: Manage directory objects in an existing Samba AD domain.
+    options:
+      samba_ad_objects_server:
+        type: str
+        required: true
+        description: DNS hostname of the existing Samba AD domain controller.
+      samba_ad_objects_realm:
+        type: str
+        required: true
+        description: Kerberos realm of the existing domain.
+      samba_ad_objects_admin_password:
+        type: str
+        required: true
+        no_log: true
+        description: Administrator password for directory operations, supplied through a
+          secret store.
+      samba_ad_objects_dns_reserved_names:
+        type: list
+        elements: str
+        default:
+          - wpad
+          - isatap
+        description: DNS names reserved with administrator-owned loopback A records; an
+          empty list stops management.
+      samba_ad_objects_ous:
+        type: list
+        elements: dict
+        default: []
+        description: Organizational units in parent-before-child order; deletion uses reverse
+          order and requires empty OUs.
+        options:
+          name:
+            type: str
+            required: true
+            description: Object name.
+          path:
+            type: str
+            required: true
+            description: Parent container DN; must exist before the object is managed.
+          description:
+            type: str
+            description: Directory object description; omitted leaves it unchanged.
+          state:
+            type: str
+            default: present
+            choices:
+              - present
+              - absent
+            description: Whether the object exists; absent explicitly deletes it.
+      samba_ad_objects_users:
+        type: list
+        elements: dict
+        default: []
+        description: Domain user accounts; omitted entries are left unmanaged.
+        options:
+          username:
+            type: str
+            required: true
+            description: User logon name (sAMAccountName).
+          given_name:
+            type: str
+            description: Given name.
+          surname:
+            type: str
+            description: Surname.
+          display_name:
+            type: str
+            description: Display name.
+          email:
+            type: str
+            description: Email address.
+          description:
+            type: str
+            description: Directory object description; omitted leaves it unchanged.
+          uid_number:
+            type: int
+            description: RFC2307 user ID.
+          gid_number:
+            type: int
+            description: RFC2307 group ID.
+          unix_home_directory:
+            type: str
+            description: RFC2307 home directory.
+          login_shell:
+            type: str
+            description: RFC2307 login shell.
+          gecos:
+            type: str
+            description: RFC2307 GECOS field.
+          enabled:
+            type: bool
+            default: true
+            description: Whether the user account is enabled.
+          password:
+            type: str
+            description: Initial account password; required for creation and supplied through
+              a secret store.
+            no_log: true
+          update_password:
+            type: str
+            choices:
+              - on_create
+              - always
+            description: Override samba_ad_objects_user_update_password for this account.
+          path:
+            type: str
+            description: Parent container DN; must exist before the object is managed.
+          state:
+            type: str
+            default: present
+            choices:
+              - present
+              - absent
+            description: Whether the object exists; absent explicitly deletes it.
+      samba_ad_objects_groups:
+        type: list
+        elements: dict
+        default: []
+        description: Domain groups and optional memberships; all groups are created before
+          resolving nested memberships.
+        options:
+          name:
+            type: str
+            required: true
+            description: Object name.
+          scope:
+            type: str
+            default: global
+            choices:
+              - global
+              - domain_local
+              - universal
+            description: Group scope.
+          category:
+            type: str
+            default: security
+            choices:
+              - security
+              - distribution
+            description: Security or distribution group.
+          description:
+            type: str
+            description: Directory object description; omitted leaves it unchanged.
+          gid_number:
+            type: int
+            description: RFC2307 group ID.
+          members:
+            type: list
+            elements: str
+            description: Member account names; omitted leaves membership unmanaged, an empty
+              list is managed.
+          members_purge:
+            type: bool
+            description: Override samba_ad_objects_group_members_purge for this group.
+          path:
+            type: str
+            description: Parent container DN; must exist before the object is managed.
+          state:
+            type: str
+            default: present
+            choices:
+              - present
+              - absent
+            description: Whether the object exists; absent explicitly deletes it.
+      samba_ad_objects_user_update_password:
+        type: str
+        default: on_create
+        choices:
+          - on_create
+          - always
+        description: User password update policy; always intentionally changes passwords
+          on every run. Overridable per user.
+      samba_ad_objects_group_members_purge:
+        type: bool
+        default: false
+        description: Remove unlisted group members when members is supplied; overridable
+          per group.

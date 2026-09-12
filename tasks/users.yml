@@ -1,0 +1,27 @@
+---
+# role: samba_ad_objects
+# file: tasks/users.yml
+
+- name: SAMBA_AD_OBJECTS | Manage domain user accounts
+  jomrr.samba.samba_user:
+    username: "{{ __samba_ad_objects_user.username }}"
+    path: "{{ __samba_ad_objects_user.path | default(omit) }}"
+    given_name: "{{ __samba_ad_objects_user.given_name | default(omit) }}"
+    surname: "{{ __samba_ad_objects_user.surname | default(omit) }}"
+    display_name: "{{ __samba_ad_objects_user.display_name | default(omit) }}"
+    email: "{{ __samba_ad_objects_user.email | default(omit) }}"
+    description: "{{ __samba_ad_objects_user.description | default(omit) }}"
+    uid_number: "{{ __samba_ad_objects_user.uid_number | default(omit) }}"
+    gid_number: "{{ __samba_ad_objects_user.gid_number | default(omit) }}"
+    unix_home_directory: "{{ __samba_ad_objects_user.unix_home_directory | default(omit) }}"
+    login_shell: "{{ __samba_ad_objects_user.login_shell | default(omit) }}"
+    gecos: "{{ __samba_ad_objects_user.gecos | default(omit) }}"
+    enabled: "{{ __samba_ad_objects_user.enabled | default(true) }}"
+    password: "{{ __samba_ad_objects_user.password | default(omit) }}"
+    update_password: "{{ __samba_ad_objects_user.update_password | default(samba_ad_objects_user_update_password) }}"
+    state: "{{ __samba_ad_objects_user.state | default('present') }}"
+  loop: "{{ samba_ad_objects_users }}"
+  loop_control:
+    loop_var: __samba_ad_objects_user
+    label: "{{ __samba_ad_objects_user.username }}"
+  no_log: true

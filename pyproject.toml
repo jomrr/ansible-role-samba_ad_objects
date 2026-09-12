@@ -1,0 +1,31 @@
+[project]
+name = "samba_ad_objects"
+version = "0.0.0"
+description = "Ansible role for managing Samba AD users, groups, organizational units, and DNS reservations."
+authors = ["Jonas Mauer"]
+license = "MIT"
+keywords = ["samba", "activedirectory", "users", "groups", "ldap"]
+repository = "https://github.com/jomrr/ansible-role-samba_ad_objects"
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+
+[tool.semantic_release]
+branch = "main"
+commit_message = "build(release): version {version}"
+major_on_zero = true
+upload_to_pypi = false
+upload_to_vcs_release = true
+tag_format = "v{version}"
+version_toml = [
+    "pyproject.toml:project.version",
+]
+
+[tool.tox]
+envlist = ["lint"]
+
+[tool.tox.env.lint]
+description = "Lint code"
+skip_install = true
+deps = ["ansible-lint"]
+commands = [["ansible-lint", "--offline"]]

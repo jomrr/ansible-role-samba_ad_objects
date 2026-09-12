@@ -1,0 +1,87 @@
+---
+# role: samba_ad_objects
+# file: molecule/resources/playbooks/side_effect.yml
+
+- name: SAMBA_AD_OBJECTS | Verify updates and deletions
+  hosts: all
+  gather_facts: true
+  module_defaults:
+    samba_ad_objects_test_objects:
+      server: dc1.ad.example.test
+      realm: "{{ samba_ad_objects_realm }}"
+      bind_username: Administrator
+      bind_password: "{{ samba_ad_objects_admin_password }}"
+  tasks:
+    - name: SAMBA_AD_OBJECTS | Seed an extra unmanaged group member
+      samba_ad_objects_test_objects:
+        phase: seed
+
+    - name: SAMBA_AD_OBJECTS | Preview updates and deletions in check mode
+      ansible.builtin.include_role:
+        name: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}"
+        apply:
+          check_mode: true
+      vars: &__samba_ad_objects_updated_inputs
+        samba_ad_objects_group_members_purge: true
+        samba_ad_objects_ous:
+
+          - name: Molecule
+            path: DC=ad,DC=example,DC=test
+
+          - name: Staff
+            path: OU=Molecule,DC=ad,DC=example,DC=test
+            description: Updated staff OU
+
+          - name: Groups
+            path: OU=Molecule,DC=ad,DC=example,DC=test
+
+          - name: Retired
+            path: OU=Molecule,DC=ad,DC=example,DC=test
+            state: absent
+
+          - name: Children
+            path: OU=Retired,OU=Molecule,DC=ad,DC=example,DC=test
+            state: absent
+        samba_ad_objects_users:
+          - username: molecule-managed
+            path: OU=Molecule,DC=ad,DC=example,DC=test
+            display_name: Updated managed user
+            enabled: false
+          - username: molecule-retired
+            state: absent
+        samba_ad_objects_groups:
+
+          - name: molecule-parent-group
+            path: OU=Groups,OU=Molecule,DC=ad,DC=example,DC=test
+            members:
+              - molecule-managed-group
+            members_purge: false
+
+          - name: molecule-managed-group
+            path: OU=Groups,OU=Molecule,DC=ad,DC=example,DC=test
+            members:
+              - moleculereader
+            description: Updated managed group
+
+          - name: molecule-scope-group
+            path: OU=Molecule,DC=ad,DC=example,DC=test
+            scope: domain_local
+            category: security
+            members:
+              - moleculereader
+
+          - name: molecule-retired-group
+            state: absent
+
+    - name: SAMBA_AD_OBJECTS | Verify check mode preserved the seeded directory state
+      samba_ad_objects_test_objects:
+        phase: seeded
+
+    - name: SAMBA_AD_OBJECTS | Apply updates and deletions
+      ansible.builtin.include_role:
+        name: "{{ lookup('ansible.builtin.env', 'MOLECULE_PROJECT_DIRECTORY') }}"
+      vars: *__samba_ad_objects_updated_inputs
+
+    - name: SAMBA_AD_OBJECTS | Verify updated and deleted objects
+      samba_ad_objects_test_objects:
+        phase: updated

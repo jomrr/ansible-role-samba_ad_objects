@@ -1,0 +1,23 @@
+---
+# role: samba_ad_objects
+# file: molecule/resources/playbooks/verify.yml
+
+- name: SAMBA_AD_OBJECTS | Verify directory objects
+  hosts: all
+  gather_facts: false
+  tasks:
+    - name: SAMBA_AD_OBJECTS | Verify managed directory objects and nested memberships
+      samba_ad_objects_test_objects:
+        server: dc1.ad.example.test
+        realm: "{{ samba_ad_objects_realm }}"
+        bind_username: Administrator
+        bind_password: "{{ samba_ad_objects_admin_password }}"
+        phase: initial
+
+    - name: SAMBA_AD_OBJECTS | Verify DNS reservations and authenticated update restrictions
+      samba_ad_objects_test_directory:
+        server: dc1.ad.example.test
+        realm: "{{ samba_ad_objects_realm }}"
+        bind_username: Administrator
+        bind_password: "{{ samba_ad_objects_admin_password }}"
+      no_log: true
