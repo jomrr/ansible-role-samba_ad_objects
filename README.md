@@ -3,8 +3,8 @@
 ![GitHub](https://img.shields.io/github/license/jomrr/ansible-role-samba_ad_objects)
 ![GitHub last commit](https://img.shields.io/github/last-commit/jomrr/ansible-role-samba_ad_objects)
 ![GitHub issues](https://img.shields.io/github/issues-raw/jomrr/ansible-role-samba_ad_objects)
-[![dev](https://img.shields.io/github/actions/workflow/status/jomrr/ansible-role-samba_ad_objects/dev.yml?branch=dev&event=push&label=dev)](https://github.com/jomrr/ansible-role-samba_ad_objects/actions/workflows/dev.yml?query=branch%3Adev)
-[![main](https://img.shields.io/github/actions/workflow/status/jomrr/ansible-role-samba_ad_objects/main.yml?branch=main&event=push&label=main)](https://github.com/jomrr/ansible-role-samba_ad_objects/actions/workflows/main.yml?query=branch%3Amain)
+[![dev](https://img.shields.io/github/actions/workflow/status/jomrr/ansible-role-samba_ad_objects/dev.yml?branch=dev&label=dev)](https://github.com/jomrr/ansible-role-samba_ad_objects/actions/workflows/dev.yml?query=branch%3Adev)
+[![main](https://img.shields.io/github/actions/workflow/status/jomrr/ansible-role-samba_ad_objects/main.yml?branch=main&label=main)](https://github.com/jomrr/ansible-role-samba_ad_objects/actions/workflows/main.yml?query=branch%3Amain)
 
 Ansible role for managing Samba AD users, groups, organizational units, and DNS
 reservations.
